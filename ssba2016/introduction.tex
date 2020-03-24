@@ -1,0 +1,12 @@
+\section{Introduction}
+The use of cameras to provide vision-based surround sensing seems intuitively a good idea, likely in part because vision plays such a large role in our perception. Vision-based surround awareness can be achieved many ways which we categorize as: 
+\begin{itemize}
+\item Mobile sensor 
+\item Wide field sensor ie fish-eye/parabolic mirror based. 
+\item Multi camera arrays
+\end{itemize}
+Mobile sensors have famously been used on the mars rovers, but have seen little in general robotics, as they are limited by maneuvering arm performance. Wide field sensors are growing in popularity among researchers, but place strong restrictions on the mount and robot chassis and remain expensive. Using multiple regular cameras is straightforward given the large number of powerful real time monocular structure from motion~(SFM) systems today available today~\cite{engel14eccv,mythesis}. Late fusion, i.e. at the point-cloud / odometry stage, provides a straightforward and simple-to-implement system which, given known extrinsics and sufficient excitation through motion, provides metric reconstructions. In practice there is much to gain from an early fusion, ie at the image correspondence stage, as this makes the associations more robust. This is especially important, due to the approximations used to limit the combinatorial explosion otherwise caused by association-uncertainty propagation inherent to feature point trackers and matchers. One example of a early fusion is the Cv4x NView SFM framework by Persson et al~\cite{persson2015robust}. Cv4x essentially performs a joint odometry estimation for each frame through bootstrap tracking for a rigid camera set. In order to extend Cv4x for the non overlapping case we required an appropriate minimal case solver. \\
+
+In this technical report we discuss the properties of an implementation of a scale estimator equivalent to the work of Clipp et al~\cite{clipp2008robust} used in conjunction with a RANSAC based standard essential-matrix solver. 
+
+

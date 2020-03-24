@@ -1,0 +1,35 @@
+\section{Method}
+
+
+\subsection{minimal case: 5+1}
+The minimal solver is a straightforward combination of a standard 5 point E estimator, the standard decomposition and equation~(\ref{theory:eqn:scale}).  \\
+
+Estimating the essential matrix using Hartley's implementation gives up to 10 roots/ candidates. After the imaginary solutions are discarded, the 5 points used to compute the solutions are used to verify that the remaining solutions are correct. This removes rare failures due to numerical issues and degenerate point configurations. 
+In a truly minimal case we would then decompose each essential matrix into its 4 rigid transform possibilities. This generates up to 40 solution candidates. 
+
+\subsection{In practice}
+$5+1$ correspondences between two cameras is a rare scenario, in practice we always have many correspondences in between both image pairs which means the $5+1$ minimal solver will be used inside a RANSAC loop. 
+Its important to select a RANSAC variant in accordance with the properties of the correspondences and problem in order to achieve good performance.
+Sequential SFM typically has an inlier ratio $>75\%$, inlier noise in the $[0.1 - 2]$ pixel range and a large number of correspondences $>100$. Thus we adapt the solver accordingly. \\
+\subsection{5-Point}
+First: Due to the high inlier noise it is crucial that a good estimate is provided and in order to ensure this we use a LO-SAC variant which has been show to provide high quality estimates despite the presence of inlier noise~\cite{lebeda2012fixing}.\\
+
+Second: Finding the solution with the greatest number of inliers requires evaluating the error for each correspondence and up to $10$ solutions. However thanks to the high inlier ratio, the solution with the highest inlier ratio among the candidates on a small~($30$) random sampling of the correspondences is is sufficiently likely to be the correct one.  \\
+
+Third: The candidate E matrix is decomposed, and its chirality identified using the inlier subset. The points are triangulated and the estimate refined using minimization over the inlier subset. \\
+
+Fourth: The refined pose candidate is evaluated and compared to the current best by testing the correspondence reprojection errors. For small correspondence sets all correspondences are evaluated. Larger sets are evaluated by randomly testing correspondences until the probability that the pose candidate inlier ratio will exceed the current best, drops below a threshold.\\
+
+Iterate 1-4 a suitable number of times, select the candidate pose with the highest inlier ratio. \\
+
+Finally: The winning candidate is refined by optimizing the result over all inliers. The correspondences are reevaluated and the pose is re-optimized if the set has changed. 
+
+\subsection{1-Point}
+
+Given the estimate for the relative pose the scale is computed for each correspondence in the second camera. The scales with top $75\%$ $|a|,|b|$ values are used to evaluate the number of inliers for each scale in parallel. Given the winner, the $2x$ scale test of Clipp et al~\cite{clipp2008robust} is used to verify that scale was observable followed by non-linear optimization over the reprojection inliers in both images. 
+
+
+
+
+
+

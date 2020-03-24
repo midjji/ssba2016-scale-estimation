@@ -1,0 +1,69 @@
+\documentclass{SSBAtran}
+\usepackage{graphicx}
+\usepackage[cmex10]{amsmath}
+
+
+% *** PDF, URL AND HYPERLINK PACKAGES ***
+%
+%\usepackage{url}
+% url.sty was written by Donald Arseneau. It provides better support for
+% handling and breaking URLs. url.sty is already installed on most LaTeX
+% systems. The latest version can be obtained at:
+% http://www.ctan.org/tex-archive/macros/latex/contrib/misc/
+% Read the url.sty source comments for usage information. Basically,
+% \url{my_url_here}.
+
+
+
+
+
+% *** Do not adjust lengths that control margins, column widths, etc. ***
+% *** Do not use packages that alter fonts (such as pslatex).         ***
+
+\usepackage{color} % For inkscape pdf+latex image import
+
+% correct bad hyphenation here
+\hyphenation{op-tical net-works semi-conduc-tor}
+
+
+\begin{document}
+%
+% paper title
+% can use linebreaks \\ within to get better formatting as desired
+\title{Metric scale with non-overlapping cameras\\ the 5+1 point method}
+
+% author names and affiliations
+
+\author{
+	\IEEEauthorblockN{ Mikael Persson, Andreas Robinson }
+	\IEEEauthorblockA{Computer Vision Laboratory, Link\"oping University\\
+		Email: $\{$mikael.persson, andreas.robinson$\}$@liu.se}
+}
+
+\maketitle
+
+\input{abstract.tex}
+\input{introduction.tex}
+\input{related_work.tex}
+\input{theory.tex}
+\input{method.tex}
+\input{experiments.tex}
+
+\section{Conclusion}
+We have presented a re-derivation of the 5+1 point method along with practical details for the effective implementation accompanied by corresponding source code software.
+\\ 
+\newline
+https://github.com/midjji/ssba2016-scale-estimation
+
+
+% use section* for acknowledgement
+\section*{Acknowledgment}
+Google for not revealing Clipp et al~\cite{clipp2008robust} until we had had the opportunity to truly understand the method. 
+
+\vspace{2mm} % this command adds a little vertical space to fine-tune
+\newpage 
+\bibliographystyle{SSBAtrans}
+\bibliography{ssba}
+
+% that's all folks
+\end{document}

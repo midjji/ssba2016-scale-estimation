@@ -1,0 +1,75 @@
+\section{Theory}
+\begin{figure}[t]
+\centering
+\def\svgwidth{\columnwidth}
+\graphicspath{{images/}}
+\input{images/camera_motion.pdf_tex}
+\caption{Camera setup}
+\label{theory:fig:cameras}
+\end{figure}
+
+
+\subsection{Scale through direct linear transform}
+
+The projections ($y_{a'},y_a$) of a point $x$ observed by pinhole cameras ($P_{a'},P_a$) related by the transform $P_{a'a}(x)=R_{a'a}x+t_{a'a} :P_{a'}=P_ {a'a}P_a$ are constrained by the epipolar constraint which explicitly parametrized by the rotation and translation is equation~(\ref{theory:eqn:epia}):
+\begin{align}
+\label{theory:eqn:epia}
+ & y_a'^TE_{a'a}y_a =0 \iff \nonumber \\
+ & y_a'^T[t_{a'a}]_xR_{a'a}y_a =0
+\end{align} 
+where $[v]_x$ is the cross product matrix of the vector $v$.
+
+Similarily the point projections ($y_b',y_b$) observed by cameras ($P_b',P_b$) are constrained by: \begin{equation}
+\label{theory:eqn:epib}
+y_b'^T[t_{b'b}]_xR_{b'b}y_b =0
+\end{equation}
+
+Let $P_{ba}:~P_b=P_{ba}P_a$ known and for convenience $P_{ab}=R$. From the pose-graph formed by the rigidly coupled cameras shown in figure~\ref{theory:fig:cameras} we derive the following relations:
+\begin{align}
+\label{theory:eqn:pose1}
+ & R_{b'b}=R_{ba}R_{a'a}R_{ba}^T \nonumber \\
+ & t_{b'b}=t_{ba} + R_{ba}R_{a'a}t_{ab} + R_{ba}t_{a'a} 
+\end{align}
+
+Assume that $R_{a'a}$ is estimated as $\hat{R}_{a'a}$ and $t_{a'a}/|t_{a'a}|$ as $\hat{t}_{a'a}$ implying that $t_{a'a}=|t_{a'a}|*\hat{t}_{a'a} = s\hat{t}_{a'a}$. Equations~(\ref{theory:eqn:epib}) and ~(\ref{theory:eqn:pose1}), imply
+% använd \iif inte \leftrightarrow!
+\begin{align}
+&y_b'^T[t_{ba} + R_{ba}\hat{R}_{a'a}t_{ab} + R_{ba}\hat{t}_{a'a}s]\hat{R}_{b'b}y_b =0  \nonumber \\ 
+&y_b'^T[t_{ba} + R_{ba}\hat{R}_{a'a}t_{ab}]_x\hat{R}_{b'b}q =-p^T[R_{ba}\hat{t}_{a'a}s]_x\hat{R}_{b'b}y_b  \nonumber \\
+&y_b'^T[t_{ba} + R_{ba}\hat{R}_{a'a}t_{ab}]_x\hat{R}_{b'b}q =-sp^T[R_{ba}\hat{t}_{a'a}]_x\hat{R}_{b'b}y_b \nonumber \\
+&s=-\frac{y_b'^T[t_{ba} + R_{ba}\hat{R}_{a'a}t_{ab}]_x\hat{R}_{b'b}q}{p^T[R_{ba}\hat{t}_{a'a}]_x\hat{R}_{b'b}y_b}
+\end{align}
+
+
+In other words the scale can be estimated from a single non overlapping correspondence in the second camera using equation~(\ref{theory:eqn:scale}). 
+
+\begin{equation}
+\label{theory:eqn:scale}
+|t_{a'a}|=-\frac{y_{b'}^T[t_{ba} + R_{ba}\hat{R}_{a'a}t_{ab}]_x\hat{R}_{b'b}y_b}{y_{b'}^T[R_{ba}\hat{t}_{a'a}]_x\hat{R}_{b'b}y_b}
+\end{equation}
+
+
+\subsection{Scale observability}
+
+Clipp et al remark upon two out of three of the degenerate motion cases: No rotation and concentric circles~\cite{clipp2008robust}. In addition there are requirements on the camera setup: The camera centers must be distinct and the observations points may not all lie at infinity. Furthermore the cameras must be rotated in relation to each other. These requirements follow directly from equation~(\ref{theory:eqn:scale}). Specifically, to observe the scale it is also necessary that
+\begin{eqnarray}
+t_{ba}~\neq \mathrm{0} \\
+R_{ba}~\neq \mathrm{I} \\
+t_{a'a}~\neq \mathrm{0}
+\end{eqnarray}
+where $\mathrm{0}$ refers to the 3-element zero vector and $\mathrm{I}$ is the 3x3 unit matrix.
+
+
+\subsection{Noise}
+Consider the impact of measurement noise for a ratio estimate: 
+\begin{equation}
+|t_{a'a}| = -\frac{y_{b'}^T[t_{ba} + R_{ba}\hat{R}_{a'a}t_{ab}]_x\hat{R}_{b'b}y_b}{y_{b'}^T[R_{ba}\hat{t}_{a'a}]_x\hat{R}_{b'b}y_b} =\frac{a}{b}
+\end{equation}
+
+We hypothesize and demonstrate, see experiments, that the quality of the resulting scale will be directly correlated with the values of ($|a|$, and $|b|$). This is due to the increased impact of noise, primarily in ($y_b',y_b$), when either $|a|$ or $|b|$ become small. \\
+
+In other words: Estimate~($\hat{s}$) quality can be estimated directly from ($|a|$, $|b|$). This allows poor estimates to be excluded without counting inliers increasing RANSAC performance. Further, we can use this information to check the number of inliers among correspondences constrained by scale, rather than both the informative and uninformative correspondences. This results in a more robust scale quality estimate and faster RANSAC convergence. 
+
+\subsection{Non-linear fusion}
+
+Constraints such as $y'^T[t]_xRy = 0$, often referred to as algebraic errors, are ill suited for overdetermined systems. This is because they are not invariant to the coordinate system of $y$. Hartley normalization can reduce the impact of this problem~\cite{hartley1997defense}. However, even in robust versions of this scheme, the optimizer is not guaranteed to weigh errors independently of the coordinate system. In practice this motivates the use of non-linear optimization. A direct approach would be minimization using the distance from the epipolar line but we have found it is better to optimize the reprojection errors of points forced to lie in front of each camera~\cite{mythesis}. 
